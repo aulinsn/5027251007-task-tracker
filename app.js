@@ -12,7 +12,62 @@ const listEl = document.getElementById("task-list");
 const counterEl = document.getElementById("counter");
 const emptyEl = document.getElementById("empty");
 
-// 02 — Satu-satunya fungsi yang membangun tampilan
+form.addEventListener("submit", (event) => {
+  event.preventDefault();
+
+  const judul = inputJudul.value.trim();
+  const deadline = inputDeadline.value;
+
+  if (judul.length < 3) {
+    showError("Judul tugas minimal 3 karakter.");
+    return;
+  }
+  if (!deadline) {
+    showError("Deadline wajib diisi.");
+    return;
+  }
+
+  showError("");
+  tasks.push({
+    id: Date.now(),
+    judul,
+    matkul: inputMatkul.value,
+    deadline,
+    selesai: false,
+  });
+  
+  form.reset();
+  inputJudul.focus();
+  render();
+});
+
+function showError(message) {
+  errorEl.textContent = message;
+  errorEl.hidden = message === "";
+}
+
+// 03 — Event delegation: satu listener di <ul> untuk semua item
+listEl.addEventListener("click", (event) => {
+  const item = event.target.closest("li");
+  if (!item) return;
+  const id = Number(item.dataset.id);
+
+  if (event.target.closest(".hapus")) {
+    tasks = tasks.filter((t) => t.id !== id);
+    render();
+  }
+});
+
+listEl.addEventListener("change", (event) => {
+  if (!event.target.matches('input[type="checkbox"]')) return;
+  const item = event.target.closest("li");
+  const task = tasks.find((t) => t.id === Number(item.dataset.id));
+  if (task) {
+    task.selesai = event.target.checked;
+    render();
+  }
+});
+
 function render() {
   const items = tasks.map((t) => {
     const li = document.createElement("li");
